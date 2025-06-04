@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GENERAL INFORMATION</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            
+            flex-direction: row;
+        }
+        
+        #galleryFrame {
+            width: 70%;
+            height: 100%;
+            border: none;
+            box-sizing: border-box;
+        }
+        
+        /* Container for the right column */
+        .right-column {
+            width: 30%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #sliderFrame {
+            width: 100%;
+            height: 63%;
+            border: none;
+            box-sizing: border-box;
+        }
+        
+        #birthdayFrame {
+            width: 100%;
+            height: 37%;
+            border: none;
+            box-sizing: border-box;
+        }
+
+        /* Timer display */
+        #refreshTimer {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            z-index: 1000;
+        }
+
+        /* Basic responsiveness for smaller screens */
+        @media (max-width: 900px) {
+            body, html {
+                flex-direction: column;
+                overflow-y: auto;
+                height: auto;
+            }
+            
+            #galleryFrame {
+                width: 100%;
+                height: 60vh;
+                min-height: 400px;
+            }
+            
+            .right-column {
+                width: 100%;
+                height: auto;
+                flex-direction: column;
+            }
+            
+            #sliderFrame {
+                width: 100%;
+                height: 20vh;
+                min-height: 200px;
+            }
+            
+            #birthdayFrame {
+                width: 100%;
+                height: 20vh;
+                min-height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Timer display -->
+    <div id="refreshTimer">Next refresh in: <span id="countdown">60:00</span></div>
+    
+    <iframe id="galleryFrame" src="https://script.google.com/macros/s/AKfycbzvLK9XMhUBmu6u4qj7qlz1EF4YVyGASxo-aiqByjxGwc0teXeSvDg2OvJoioJIYape/exec" title="General Information Board"></iframe>
+    
+    <div class="right-column">
+        <iframe id="sliderFrame" src="https://script.google.com/macros/s/AKfycbyMlsM7MGx28RijqohJxPU_kuven1LxmBRsgWhV_U0NQYIK3S37kOdeGhuvioKkd7w/exec" title="PDF Slider"></iframe>
+        <iframe id="birthdayFrame" src="https://script.google.com/a/macros/ggpc.com.ph/s/AKfycbyd_b1wn8Fd1TNBKwNpmo2ryBOcFchBBC-vfAITicmScmsJ5dIVRW2me9XbNX2IyObCYw/exec" title="Today's Birthday"></iframe>
+    </div>
+
+    <script>
+        // Auto-refresh the page every hour (3600000 milliseconds)
+        const REFRESH_INTERVAL = 60 * 60 * 1000; // 1 hour in milliseconds
+        
+        // Set up the auto-refresh
+        setTimeout(function() {
+            location.reload();
+        }, REFRESH_INTERVAL);
+
+        // Optional: Display countdown timer
+        let timeLeft = REFRESH_INTERVAL / 1000; // Convert to seconds
+        const countdownElement = document.getElementById('countdown');
+        
+        function updateCountdown() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft > 0) {
+                timeLeft--;
+                setTimeout(updateCountdown, 1000);
+            }
+        }
+        
+        // Start the countdown
+        updateCountdown();
+
+        // Also refresh iframes individually every 30 minutes to keep content fresh
+        setInterval(function() {
+            const galleryFrame = document.getElementById('galleryFrame');
+            const sliderFrame = document.getElementById('sliderFrame');
+            const birthdayFrame = document.getElementById('birthdayFrame');
+            
+            // Refresh iframe sources
+            galleryFrame.src = galleryFrame.src;
+            sliderFrame.src = sliderFrame.src;
+            birthdayFrame.src = birthdayFrame.src;
+        }, 30 * 60 * 1000); // 30 minutes
+    </script>
+</body>
+</html>
