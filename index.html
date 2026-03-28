@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GENERAL INFORMATION</title>
+    <title>GENERAL INFORMATION BOARD</title>
     <style>
         body, html {
             margin: 0;
@@ -12,8 +12,8 @@
             width: 100vw;
             overflow: hidden;
             display: flex;
-            
             flex-direction: row;
+            background-color: #000; /* Dark background for a cleaner look during transitions */
         }
         
         #galleryFrame {
@@ -21,9 +21,9 @@
             height: 100%;
             border: none;
             box-sizing: border-box;
+            background-color: #fff;
         }
         
-        /* Container for the right column */
         .right-column {
             width: 30%;
             height: 100%;
@@ -36,6 +36,7 @@
             height: 63%;
             border: none;
             box-sizing: border-box;
+            background-color: #fff;
         }
         
         #birthdayFrame {
@@ -43,9 +44,9 @@
             height: 37%;
             border: none;
             box-sizing: border-box;
+            background-color: #fff;
         }
 
-        /* Timer display */
         #refreshTimer {
             position: fixed;
             top: 10px;
@@ -57,45 +58,35 @@
             font-family: Arial, sans-serif;
             font-size: 12px;
             z-index: 1000;
+            pointer-events: none;
         }
 
-        /* Basic responsiveness for smaller screens */
         @media (max-width: 900px) {
             body, html {
                 flex-direction: column;
                 overflow-y: auto;
                 height: auto;
             }
-            
             #galleryFrame {
                 width: 100%;
                 height: 60vh;
                 min-height: 400px;
             }
-            
             .right-column {
                 width: 100%;
                 height: auto;
-                flex-direction: column;
             }
-            
-            #sliderFrame {
+            #sliderFrame, #birthdayFrame {
                 width: 100%;
-                height: 20vh;
-                min-height: 200px;
-            }
-            
-            #birthdayFrame {
-                width: 100%;
-                height: 20vh;
-                min-height: 200px;
+                height: 25vh;
+                min-height: 250px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Timer display -->
-    <div id="refreshTimer">Next refresh in: <span id="countdown">60:00</span></div>
+
+    <div id="refreshTimer">Page Refresh in: <span id="countdown">60:00</span></div>
     
     <iframe id="galleryFrame" src="https://script.google.com/macros/s/AKfycbw6EturHQPBHhfoEUqvB3FH_nQYktVelbvmWZPRT3LgVluTnn_bDhyC8EKpMcttJE4Z/exec" title="General Information Board"></iframe>
     
@@ -105,43 +96,62 @@
     </div>
 
     <script>
-        // Auto-refresh the page every hour (3600000 milliseconds)
-        const REFRESH_INTERVAL = 60 * 60 * 1000; // 1 hour in milliseconds
+        // --- CONFIGURATION ---
+        const REFRESH_INTERVAL = 60 * 60 * 1000; // 1 Hour (Full Page)
+        const GALLERY_SWITCH_TIME = 60 * 1000;   // 1 Minute (URL Swap)
+        const SIDEBAR_REFRESH_TIME = 30 * 60 * 1000; // 30 Minutes
         
-        // Set up the auto-refreshh
-        setTimeout(function() {
+        // Gallery URLs
+        const URL_A = "https://script.google.com/macros/s/AKfycbw6EturHQPBHhfoEUqvB3FH_nQYktVelbvmWZPRT3LgVluTnn_bDhyC8EKpMcttJE4Z/exec";
+        const URL_B = "https://script.google.com/macros/s/AKfycbxVHk5HkKEL4RyS_evAftH8WFPaG0gnEeuqZcjjlvjBDu1xEVjktBnBbT9chWEk8tEm/exec";
+        
+        let currentUrlIndex = 0; // 0 for URL_A, 1 for URL_B
+
+        // --- 1. FULL PAGE AUTO-REFRESH ---
+        setTimeout(() => {
             location.reload();
         }, REFRESH_INTERVAL);
 
-        // Optional: Display countdown timer
-        let timeLeft = REFRESH_INTERVAL / 1000; // Convert to seconds
+        // --- 2. COUNTDOWN TIMER LOGIC ---
+        let timeLeft = REFRESH_INTERVAL / 1000;
         const countdownElement = document.getElementById('countdown');
         
         function updateCountdown() {
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
-            countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            countdownElement.textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             
             if (timeLeft > 0) {
                 timeLeft--;
                 setTimeout(updateCountdown, 1000);
             }
         }
-        
-        // Start the countdown
         updateCountdown();
 
-        // Also refresh iframes individually every 30 minutes to keep content fresh
-        setInterval(function() {
-            const galleryFrame = document.getElementById('galleryFrame');
-            const sliderFrame = document.getElementById('sliderFrame');
-            const birthdayFrame = document.getElementById('birthdayFrame');
+        // --- 3. GALLERY SWITCHING LOGIC (Every 1 Minute) ---
+        setInterval(() => {
+            const gallery = document.getElementById('galleryFrame');
+            if (currentUrlIndex === 0) {
+                gallery.src = URL_B;
+                currentUrlIndex = 1;
+            } else {
+                gallery.src = URL_A;
+                currentUrlIndex = 0;
+            }
+            console.log("Gallery switched at: " + new Date().toLocaleTimeString());
+        }, GALLERY_SWITCH_TIME);
+
+        // --- 4. SIDEBAR REFRESH (Every 30 Minutes) ---
+        setInterval(() => {
+            const slider = document.getElementById('sliderFrame');
+            const birthday = document.getElementById('birthdayFrame');
             
-            // Refresh iframe sources
-            galleryFrame.src = galleryFrame.src;
-            sliderFrame.src = sliderFrame.src;
-            birthdayFrame.src = birthdayFrame.src;
-        }, 30 * 60 * 1000); // 30 minutes
+            // Appending a dummy query to force reload without cache issues
+            slider.src = slider.src.split('?')[0] + '?t=' + new Date().getTime();
+            birthday.src = birthday.src.split('?')[0] + '?t=' + new Date().getTime();
+        }, SIDEBAR_REFRESH_TIME);
+
     </script>
 </body>
 </html>
